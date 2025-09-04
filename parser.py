@@ -16,7 +16,8 @@ def main():
     # agrupa todas las noticias raw
     rutaOpenGroup = r"scrapper/data"
     files = OpenAndGroup(rutaOpenGroup,'.json')
-    partes = chunkFiles(files,128) 
+    n = 128
+    partes = chunkFiles(files,n) 
     """lista de listas de nombres de documentos json list[list[str]]"""
     
     fileLen = (checkLengthFile(rutaOpenGroup,files))
