@@ -9,7 +9,7 @@ def main():
     stime = time.time()
     if not os.path.isdir("scrapper/data"):
         os.makedirs("scrapper/data")
-    #scraps the web
+    ## scraps the web
     Scrap()
     print("\n"+"-"*40+"\n", "PROCESSING FILES")
 
@@ -34,16 +34,11 @@ def main():
     #tokenizar y escribir
     rutaTemp = r"tokenized\\"
     
-    #elimina si ya existia un archivo tokenized.txt
-    for i in os.listdir(rutaTemp):
-        if i.startswith('tokenized'):
-            os.remove(fr"tokenized/tokenized.txt")
-
     #lista de archivos temporales a procesar
     filesToProcess = OpenAndGroup(rutaTemp,'.txt')
     #generar achivo tokenized.txt
     generateTokenizedPlainFile(filesToProcess,rutaTemp)
-    #generar archivo tokens.txt
+    #generar archivo tokens.json
     genTokens()
     
     os.system('cls')
@@ -55,21 +50,19 @@ def main():
 
     os.system('cls')
     print("\n"+"-"*40+"\n", "TAGGING")
-    try:
-        with Pool(12) as p:
-            p.apply_async(TagWords)
-    except Exception as e:
-        print("TAGGING FAILED: ", e)
+    with Pool(12) as p:
+        p.apply(TagWords)
 
-    # print(f"\n\n\n   Tiempo total: {(time.time()-stime)/60} minutos")
-    # print("\n"+"-"*40+"\n", "COUNTING FREQS")
-    # with multiprocessing.Pool(processes=6) as pool:
-    #     pool.apply(countFreq)
+    print(f"\n\n\n   Tiempo total: {(time.time()-stime)/60} minutos")
+    print("\n"+"-"*40+"\n", "COUNTING FREQS")
+    with Pool(processes=6) as p:
+        try:
+            p.apply(countFreq())
+        except Exception as e:
+            print(e)
 
     print(f"\n\n\nFINALIZADO: Tiempo total: {(time.time()-stime)/60} minutos")
     
-
-
 
 
 

@@ -13,9 +13,10 @@
 - **Writes every token in a json file as list**
 
 ## 4. Tagging
-*Current Work in progress*
 - **Adds the gramathical cathegory to every word**
 
 ## 5. Frequencies
+**Current work in progress**
+
 *Example in freqs folder*
 - **Counts the times that a word with a given tag appears in the corpora**

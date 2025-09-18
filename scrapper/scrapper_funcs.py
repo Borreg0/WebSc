@@ -1,4 +1,4 @@
-import requests,re,json,os,time
+import requests,re,json,os
 from bs4 import BeautifulSoup
 from scrapper.noticia import Noticia
 
