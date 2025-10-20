@@ -107,7 +107,7 @@ def tokenize(raw_text:str):
 def TagWords():
     """Using Spacy Spanish Tagger loads plain text file, splits it in n-parts of fixed length and tags them"""
 
-    print(f"Writing... \n\n")
+    print(f"Tagging... \n\n")
     with open("tokenized/tokenized.txt","r",encoding="utf-8") as f:
         tokens = f.read()
 
@@ -117,11 +117,11 @@ def TagWords():
     alltagged = []
     for t in tokens:
         doc = nlp(t)
-    alltagged.extend([(word.text, word.pos_) for word in doc])
-    # Merge all tuples in single list
+        alltagged.extend([(word.text, word.pos_) for word in doc])
+        # Merge all tuples in single list
 
     with open("tagged_data/tagged_words.json", "w", encoding="utf-8") as f:
-        print(f"Writing... \n\n")
+        print(f"Writing in file... \n\n")
         json.dump(alltagged, f, ensure_ascii=False)   
 
 def splitTextForTagging(text:str) -> list[str]:
@@ -145,10 +145,45 @@ def countFreq():
         f.close()
 
 def makeBigrams():
-    pass    
+    """WIP"""
+    with open("tokenized/tokens.json","r",encoding="UTF-8") as f:
+        tokenized = json.load(f)
+        f.close()
+    bigrams = ngrams(tokenized,2,pad_left=True, pad_right=True, left_pad_symbol='<s>', right_pad_symbol='</s>')
+
+    print(list(bigrams))
 
 def extractSentences():
-    pass
+    ruta = "scrapper/data"
+    files = OpenAndGroup(ruta,".json")
+    nlp = es_core_news_sm.load()
+
+    #removes sents.json if exists
+    for i in os.listdir("tokenized/"):
+        if i.startswith('sents.json'):
+            os.remove(fr"tokenized/sents.json")
+
+    #iterates every news to write its sentences
+    for file in files:
+        string = str()
+        with open(ruta+"/"+file,"r",encoding="UTF-8") as f:
+            news:dict = json.load(f)
+            for i in news.keys():
+                tipo = type(news[i])
+                if i in ["titulo", "entradilla", "cuerpo"]:
+                    if tipo == str:
+                        text = nlp(news[i])
+                        sents = list(text.sents)
+                        print(f"<{sents}..>")
+                    elif tipo == list:
+                        text = nlp(news[i][0])
+                        sents = list(text.sents)
+                        print(f"<{sents}..>")
+                else:
+                    pass  
+            f.close()            
+        # with open("tokenized/sents.json","a",encoding="UTF-8") as f:
+        #     json.dump([sent for sent in sents], f, ensure_ascii=False)
 
 def checkLengthFile(ruta,partes):
     counter = 0

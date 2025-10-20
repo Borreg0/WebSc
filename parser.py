@@ -27,7 +27,7 @@ def main():
         rutaData = r"scrapper/data"
         for n, parte in enumerate(partes, start=1):
             print(f"CHUNK {n}")
-            p.apply(singleFile, args=(parte, rutaData,n))
+            p.apply(singleFile, args=(parte, rutaData, n))
     
     os.system('cls')
     print("-"*40+"\n", "WRITING TOKENS")
@@ -57,9 +57,13 @@ def main():
     print("\n"+"-"*40+"\n", "COUNTING FREQS")
     with Pool(processes=6) as p:
         try:
-            p.apply(countFreq())
+            p.apply(countFreq)
         except Exception as e:
             print(e)
+    print(f"\n\n\n   Tiempo total: {(time.time()-stime)/60} minutos")
+    print("\n"+"-"*40+"\n", "EXTRACTING SENTENCES")
+    extractSentences()
+    
 
     print(f"\n\n\nFINALIZADO: Tiempo total: {(time.time()-stime)/60} minutos")
     
