@@ -62,8 +62,11 @@ def main():
             print(e)
     print(f"\n\n\n   Tiempo total: {(time.time()-stime)/60} minutos")
     print("\n"+"-"*40+"\n", "EXTRACTING SENTENCES")
-    extractSentences()
-    
+    with Pool(processes=6) as p:
+        try:
+            p.apply(extractSentences)
+        except Exception as e:
+            print(e)
 
     print(f"\n\n\nFINALIZADO: Tiempo total: {(time.time()-stime)/60} minutos")
     

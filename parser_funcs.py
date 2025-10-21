@@ -83,9 +83,25 @@ def generateTokenizedPlainFile(filesToProcess,rutaTemp):
                 f.write(t + " ")
 
     #removes temp files
-    for n,i in enumerate(os.listdir(rutaTemp),start=1):
-        if i.startswith('temp'):
+    for n,i in enumerate(os.listdir(rutaTemp)):
+        try:
             os.remove(fr"tokenized/temp{n}.txt")
+        except:
+            pass
+
+def grammarFix(value:str):
+    """Adds spaces in these contexts:
+    aE -> a E
+    a?E -> a? E
+    .¿ -> . ¿
+    .A -> . A
+    """
+    value = re.sub(r'(?<=[a-z])(?=[A-Z])', ". ", value)
+    value = re.sub(r'\?(?=[A-Z])', '? ', value)
+    value = re.sub(r'\.(?=¿)', '. ', value)
+    value = re.sub(r'(?<!\b[A-Z])\.(?=[A-Z])', '. ', value)
+
+    return value
 
 def genTokens():
     """Creates the tokens file in json"""
@@ -119,7 +135,6 @@ def TagWords():
         doc = nlp(t)
         alltagged.extend([(word.text, word.pos_) for word in doc])
         # Merge all tuples in single list
-
     with open("tagged_data/tagged_words.json", "w", encoding="utf-8") as f:
         print(f"Writing in file... \n\n")
         json.dump(alltagged, f, ensure_ascii=False)   
@@ -154,9 +169,12 @@ def makeBigrams():
     print(list(bigrams))
 
 def extractSentences():
-    ruta = "scrapper/data"
+    """Extracts the sentences from raw files contained in a folder"""
+    ruta = r"scrapper/data"
     files = OpenAndGroup(ruta,".json")
     nlp = es_core_news_sm.load()
+
+    allSentences = []
 
     #removes sents.json if exists
     for i in os.listdir("tokenized/"):
@@ -165,25 +183,25 @@ def extractSentences():
 
     #iterates every news to write its sentences
     for file in files:
-        string = str()
         with open(ruta+"/"+file,"r",encoding="UTF-8") as f:
             news:dict = json.load(f)
-            for i in news.keys():
-                tipo = type(news[i])
-                if i in ["titulo", "entradilla", "cuerpo"]:
-                    if tipo == str:
-                        text = nlp(news[i])
-                        sents = list(text.sents)
-                        print(f"<{sents}..>")
-                    elif tipo == list:
-                        text = nlp(news[i][0])
-                        sents = list(text.sents)
-                        print(f"<{sents}..>")
-                else:
-                    pass  
-            f.close()            
-        # with open("tokenized/sents.json","a",encoding="UTF-8") as f:
-        #     json.dump([sent for sent in sents], f, ensure_ascii=False)
+            for key in news.keys():
+                if key in ["titulo", "entradilla", "cuerpo"]:
+                    rawValue = news[key]
+                    if isinstance(rawValue, str):
+                        value = grammarFix(str(rawValue))
+                        text = nlp(value)
+                        allSentences.extend([str(sent).strip() for sent in text.sents])    
+                    elif isinstance(rawValue, list) and rawValue:
+                        for item in rawValue:
+                            if isinstance(item, str):
+                                value = grammarFix(item)
+                                text = nlp(value[0])
+                                allSentences.extend([str(sent).strip() for sent in text.sents])
+                    else:
+                        pass  
+    with open("tokenized/sents.json", "w+", encoding="utf-8") as f:
+        json.dump(allSentences, f, ensure_ascii=False)              
 
 def checkLengthFile(ruta,partes):
     counter = 0
